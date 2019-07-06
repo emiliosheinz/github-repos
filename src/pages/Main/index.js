@@ -5,13 +5,14 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa'
 import api from '../../services/api'
 
 import Container from '../../components/Container'
-import { Form, SubmitButton, List } from './styles'
+import { Form, SubmitButton, List, Input } from './styles'
 
 class Main extends Component {
   state = {
     newRepo: '',
     repositories: [],
     loading: false,
+    searchError: false,
   }
 
   componentDidMount() {
@@ -34,6 +35,12 @@ class Main extends Component {
     this.setState({ newRepo: e.target.value })
   }
 
+  handleInputFocus = () => {
+    this.setState({
+      searchError: false,
+    })
+  }
+
   handleSubmit = async e => {
     e.preventDefault()
 
@@ -41,22 +48,37 @@ class Main extends Component {
 
     const { newRepo, repositories } = this.state
 
-    const response = await api.get(`/repos/${newRepo}`)
+    try {
+      const isRepoDuplicated = repositories.filter(
+        repo => repo.name.toLowerCase() === newRepo.toLowerCase()
+      )
 
-    const data = {
-      name: response.data.full_name,
-      id: response.data.id,
+      if (isRepoDuplicated.length > 0) {
+        throw new { message: 'Duplicated repository' }()
+      }
+
+      const response = await api.get(`/repos/${newRepo}`)
+
+      const data = {
+        name: response.data.full_name,
+        id: response.data.id,
+      }
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+        loading: false,
+      })
+    } catch (err) {
+      this.setState({
+        searchError: true,
+        loading: false,
+      })
     }
-
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    })
   }
 
   render() {
-    const { newRepo, repositories, loading } = this.state
+    const { newRepo, repositories, loading, searchError } = this.state
 
     return (
       <Container>
@@ -65,11 +87,13 @@ class Main extends Component {
           Repositorios
         </h1>
         <Form onSubmit={this.handleSubmit}>
-          <input
+          <Input
             type='text'
             placeholder='Adicionar repositório'
             value={newRepo}
             onChange={this.handleInputChange}
+            onFocus={this.handleInputFocus}
+            searchError={searchError}
           />
 
           <SubmitButton loading={loading}>

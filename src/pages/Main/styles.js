@@ -4,14 +4,6 @@ export const Form = styled.form`
   margin-top: 30px;
   display: flex;
   flex-direction: row;
-
-  input {
-    flex: 1;
-    border: 2px solid #eee;
-    padding: 10px 15px;
-    border-radius: 4px;
-    font-size: 16px;
-  }
 `
 
 const rotate = keyframes`
@@ -76,4 +68,22 @@ export const List = styled.ul`
       text-decoration: none;
     }
   }
+`
+
+export const Input = styled.input`
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 16px;
+  ${props =>
+    props.searchError
+      ? css`
+          transition-property: border;
+          transition-duration: 0.3s;
+          border: 2px solid #ff6060;
+          color: #ff6060;
+        `
+      : css`
+          border: 2px solid #eee;
+        `}
 `
