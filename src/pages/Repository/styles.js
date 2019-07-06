@@ -101,3 +101,48 @@ export const IssueDetails = styled.div`
     color: #999;
   }
 `
+
+export const Selector = styled.select`
+  border: 2px solid #eee;
+  flex: 1;
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-top: 30px;
+`
+
+export const ButtonsContainer = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+
+  p {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+  }
+`
+
+export const ChangePageButton = styled.button`
+  background: #7159c1;
+  border: 0;
+  padding: 15px;
+  margin-left: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  svg {
+    color: white;
+    size: 15;
+  }
+`

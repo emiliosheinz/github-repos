@@ -1,19 +1,9 @@
-import styled, { keyframes, css } from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export const Form = styled.form`
   margin-top: 30px;
   display: flex;
   flex-direction: row;
-`
-
-const rotate = keyframes`
-  from{
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg)
-  }
 `
 
 export const SubmitButton = styled.button.attrs(props => ({
@@ -36,16 +26,7 @@ export const SubmitButton = styled.button.attrs(props => ({
 
   svg {
     color: #fff;
-    size: 14px;
   }
-
-  ${props =>
-    props.loading &&
-    css`
-      svg {
-        animation: ${rotate} 2s linear infinite;
-      }
-    `}
 `
 
 export const List = styled.ul`

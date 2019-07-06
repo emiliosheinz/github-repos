@@ -1,11 +1,21 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
+import { FaArrowRight, FaArrowLeft, FaSpinner } from 'react-icons/fa'
 
 import api from '../../services/api'
 
+import Loader from '../../components/Loader'
 import Container from '../../components/Container'
-import { Loading, Owner, IssueList, IssueDetails } from './styles'
+import {
+  Loading,
+  Owner,
+  IssueList,
+  IssueDetails,
+  Selector,
+  ChangePageButton,
+  ButtonsContainer,
+} from './styles'
 
 class Repository extends Component {
   static propTypes = {
@@ -20,32 +30,98 @@ class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
+    page: 1,
+    issueState: 'all',
+    rightButtonLoading: false,
+    leftButtonLoading: false,
   }
 
   async componentDidMount() {
     const { match } = this.props
+    const { issueState, page } = this.state
 
     const repoName = decodeURIComponent(match.params.repository)
 
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
-      api.get(`/repos/${repoName}/issues`, {
-        params: {
-          state: 'open',
-          per_page: 5,
-        },
-      }),
+      this.getIssuesFromAPI(repoName, issueState, page),
     ])
 
     this.setState({
       repository: repository.data,
-      issues: issues.data,
+      issues,
       loading: false,
     })
   }
 
+  handleSelectChange = async e => {
+    const { match } = this.props
+    const issueState = e.target.value
+
+    const repoName = decodeURIComponent(match.params.repository)
+
+    const issues = await this.getIssuesFromAPI(repoName, issueState, 1)
+
+    this.setState({
+      issues,
+      issueState,
+      page: 1,
+    })
+  }
+
+  handleLeftButtonClick = async () => {
+    this.setState({ leftButtonLoading: true })
+    const { page, issueState } = this.state
+    const { match } = this.props
+
+    const repoName = decodeURIComponent(match.params.repository)
+
+    const issues = await this.getIssuesFromAPI(repoName, issueState, page - 1)
+
+    this.setState({
+      page: page - 1,
+      issues,
+      leftButtonLoading: false,
+    })
+  }
+
+  handleRightButtonClick = async () => {
+    this.setState({ rightButtonLoading: true })
+    const { page, issueState } = this.state
+    const { match } = this.props
+
+    const repoName = decodeURIComponent(match.params.repository)
+
+    const issues = await this.getIssuesFromAPI(repoName, issueState, page + 1)
+
+    this.setState({
+      page: page + 1,
+      issues,
+      rightButtonLoading: false,
+    })
+  }
+
+  getIssuesFromAPI = async (repoName, state, page) => {
+    const issues = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state,
+        page,
+        per_page: 5,
+      },
+    })
+
+    return issues.data
+  }
+
   render() {
-    const { repository, issues, loading } = this.state
+    const {
+      repository,
+      issues,
+      loading,
+      page,
+      rightButtonLoading,
+      leftButtonLoading,
+    } = this.state
 
     if (loading) {
       return <Loading>Carregando</Loading>
@@ -59,6 +135,11 @@ class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+        <Selector onChange={this.handleSelectChange}>
+          <option value='all'>Todos</option>
+          <option value='open'>Abertos</option>
+          <option value='closed'>Fechados</option>
+        </Selector>
         <IssueList>
           {issues.map(issue => (
             <li key={String(issue.id)}>
@@ -77,6 +158,34 @@ class Repository extends Component {
             </li>
           ))}
         </IssueList>
+        <ButtonsContainer>
+          <ChangePageButton
+            onClick={this.handleLeftButtonClick}
+            title='Voltar uma página'
+            disabled={page === 1}
+          >
+            {leftButtonLoading ? (
+              <Loader>
+                <FaSpinner />
+              </Loader>
+            ) : (
+              <FaArrowLeft />
+            )}
+          </ChangePageButton>
+          <p>Página {page}</p>
+          <ChangePageButton
+            onClick={this.handleRightButtonClick}
+            title='Avançar uma página'
+          >
+            {rightButtonLoading ? (
+              <Loader>
+                <FaSpinner />
+              </Loader>
+            ) : (
+              <FaArrowRight />
+            )}
+          </ChangePageButton>
+        </ButtonsContainer>
       </Container>
     )
   }

@@ -5,6 +5,7 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa'
 import api from '../../services/api'
 
 import Container from '../../components/Container'
+import Loader from '../../components/Loader'
 import { Form, SubmitButton, List, Input } from './styles'
 
 class Main extends Component {
@@ -96,8 +97,14 @@ class Main extends Component {
             searchError={searchError}
           />
 
-          <SubmitButton loading={loading}>
-            {loading ? <FaSpinner /> : <FaPlus />}
+          <SubmitButton loading={loading ? 1 : 0}>
+            {loading ? (
+              <Loader>
+                <FaSpinner />
+              </Loader>
+            ) : (
+              <FaPlus />
+            )}
           </SubmitButton>
         </Form>
         <List>
